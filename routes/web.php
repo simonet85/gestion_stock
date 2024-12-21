@@ -6,6 +6,9 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ProduitController;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\CategorieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +86,59 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/roles', [ManagerController::class, 'editRoles'])->name('roles.edit');
         Route::post('/{id}/roles', [ManagerController::class, 'updateRoles'])->name('roles.update');
     });
+
+    // Routes pour les produits
+    Route::prefix('produits')->name('produits.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        Route::get('/', [ProduitController::class, 'index'])->name('index');
+        Route::get('/create', [ProduitController::class, 'create'])->name('create');
+        Route::post('/', [ProduitController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ProduitController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProduitController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ProduitController::class, 'destroy'])->name('destroy');
+    });
+
+    // Routes pour les fournisseurs
+    Route::prefix('fournisseurs')->name('fournisseurs.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        Route::get('/', [FournisseurController::class, 'index'])->name('index');
+        Route::get('/create', [FournisseurController::class, 'create'])->name('create');
+        Route::post('/', [FournisseurController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [FournisseurController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [FournisseurController::class, 'update'])->name('update');
+        Route::delete('/{id}', [FournisseurController::class, 'destroy'])->name('destroy');
+    });
+
+    // Routes pour les catégories 
+    Route::prefix('categories')->name('categories.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        Route::get('/', [CategorieController::class, 'index'])->name('index');
+        Route::get('/create', [CategorieController::class, 'create'])->name('create');
+        Route::post('/', [CategorieController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [CategorieController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [CategorieController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CategorieController::class, 'destroy'])->name('destroy');
+    });
+
+    // Routes pour les notifications
+    Route::get('/notifications', function () {
+        // Fetch unread notifications with pagination (e.g., 10 per page)
+        $notifications = auth()->user()->unreadNotifications()->paginate(3);
+        return view('notifications.index', compact('notifications'));
+    })->name('notifications');
+
+    // Mark all notifications as read
+    Route::get('/notifications/read', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+        return redirect()->back();
+    })->name('notifications.read');
+
+    // Mark a specific notification as read
+    Route::post('/notifications/{id}/read', function ( $id) {
+        $notification = auth()->user()->unreadNotifications()->find($id);
+        if($notification){
+            $notification->markAsRead();
+        }
+        return redirect()->back();
+    })->name('notification.read');
+    
 });
 
 

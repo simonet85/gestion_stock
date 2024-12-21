@@ -14,7 +14,7 @@ class FactureSeeder extends Seeder
     public function run(): void
     {
         DB::table('factures')->insert([
-            ['commande_id' => 1, 'montant' => 2500.00, 'statut_paiement' => 'Payé'],
+            ['commande_id' => 2, 'montant' => 2500.00, 'statut_paiement' => 'Payé'],
         ]);
     }
 }

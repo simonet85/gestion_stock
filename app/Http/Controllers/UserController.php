@@ -40,7 +40,7 @@ class UserController extends Controller
         activity('user-management')
         ->causedBy(auth()->user())
         ->performedOn($user)
-        ->log('Utilisateur créé');
+        ->log('Nouveau compte enregistré avec le rôle Utilisateur');
 
         return redirect()->route('users.index')->with('success', 'Utilisateur ajouté avec succès.');
     }

@@ -13,10 +13,42 @@ class ProduitSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('produits')->insert([
-            ['nom' => 'Télévision', 'description' => 'Smart TV 55 pouces', 'quantité_Stock' => 20, 'category_id' => 1],
-            ['nom' => 'Canapé', 'description' => 'Canapé en cuir 3 places', 'quantité_Stock' => 10, 'category_id' => 2],
-            ['nom' => 'Tondeuse', 'description' => 'Tondeuse électrique pour pelouse', 'quantité_Stock' => 15, 'category_id' => 3],
-        ]);
+            // Sample data for produits table
+            $produits = [
+                [
+                    'nom' => 'Produit A',
+                    'description' => 'Description for Produit A',
+                    'quantite_stock' => 100,
+                    'category_id' => 1,
+                    'seuil_reapprovisionnement' => 10,
+                    'fournisseur_id' => 1, // Ensure this ID exists in fournisseurs table
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'nom' => 'Produit B',
+                    'description' => 'Description for Produit B',
+                    'quantite_stock' => 50,
+                    'category_id' => 2,
+                    'seuil_reapprovisionnement' => 5,
+                    'fournisseur_id' => 2, // Ensure this ID exists in fournisseurs table
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'nom' => 'Produit C',
+                    'description' => 'Description for Produit C',
+                    'quantite_stock' => 200,
+                    'category_id' => 3,
+                    'seuil_reapprovisionnement' => 20,
+                    'fournisseur_id' => 2, // Ensure this ID exists in fournisseurs table
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ];
+    
+            // Insert data into produits table
+            DB::table('produits')->insert($produits);
+        }
     }
-}
+
