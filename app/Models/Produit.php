@@ -38,4 +38,9 @@ class Produit extends Model
         return $this->belongsTo(Categorie::class);
     }
 
+        public function approvisionnements()
+    {
+        return $this->hasMany(Approvisionnement::class, 'produit_id');
+    }
+
 }

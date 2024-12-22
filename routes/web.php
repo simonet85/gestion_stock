@@ -9,6 +9,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\CategorieController;
+use App\Http\Controllers\ApprovisionnementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,6 +116,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/edit', [CategorieController::class, 'edit'])->name('edit');
         Route::put('/{id}', [CategorieController::class, 'update'])->name('update');
         Route::delete('/{id}', [CategorieController::class, 'destroy'])->name('destroy');
+    });
+
+    //routes for Approvisionnements
+    Route::prefix('approvisionnements',)->name('approvisionnements.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        Route::get('/', [ApprovisionnementController::class, 'index'])->name('index');
+        Route::get('/create', [ApprovisionnementController::class, 'create'])->name('create');
+        Route::post('/', [ApprovisionnementController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ApprovisionnementController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ApprovisionnementController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ApprovisionnementController::class, 'destroy'])->name('destroy');
     });
 
     // Routes pour les notifications

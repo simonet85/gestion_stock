@@ -28,5 +28,15 @@ class Fournisseur extends Model
         return $this->hasMany(Produit::class);
     }
 
+    /**
+     * Retourne les approvisionnements rattachés à ce fournisseur.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function approvisionnements()
+    {
+        return $this->hasMany(Approvisionnement::class, 'fournisseur_id');
+    }
+
 
 }

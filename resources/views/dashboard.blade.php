@@ -94,7 +94,7 @@
             </ul>
         </div>
 
-        <!-- Notifications -->
+        <!-- Notifications Module-->
         <div class="bg-white shadow-md rounded-lg p-6">
             <h2 class="text-xl font-semibold mb-4">Notifications</h2>
             <ul>
@@ -103,6 +103,20 @@
                 </li>
             </ul>
         </div>
+
+        <!--Approvisionnements Module -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Gestion des Approvisionnements</h2>
+            <ul>
+                <li>
+                    <a href="{{ route('approvisionnements.index') }}" class="text-blue-600 hover:underline">Liste des approvisionnements</a>
+                </li>
+                <li>
+                    <a href="{{ route('approvisionnements.create') }}" class="text-blue-600 hover:underline">Ajouter un approvisionnement</a>
+                </li>
+            </ul>
+        </div>
+        
     </div>
 </div>
 @endsection
