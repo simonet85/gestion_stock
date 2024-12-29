@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Approvisionnement;
 use App\Models\Produit;
 use App\Models\Fournisseur;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 
@@ -36,20 +37,29 @@ class ApprovisionnementController extends Controller
     {
         $validated = $request->validate([
             'produit_id' => 'required|exists:produits,id',
-            'quantité_fournie' => 'required|integer',
-            'prix_unitaire' => 'required|numeric',
+            'quantité_fournie' => 'required|integer|min:1',
+            'prix_unitaire' => 'required|numeric|min:0',
             'date_livraison' => 'required|date',
             'fournisseur_id' => 'required|exists:fournisseurs,id',
         ]);
-
-        Approvisionnement::create($validated);
-
-        // Update stock for the product
-        $produit = Produit::find($validated['produit_id']);
-        $produit->increment('quantite_stock', $validated['quantité_fournie']);
-
-        return redirect()->route('approvisionnements.index')->with('success', 'Approvisionnement ajouté avec succès.');
+    
+        try {
+            DB::transaction(function () use ($validated) {
+                $approvisionnement = Approvisionnement::create($validated);
+                
+                $produit = Produit::findOrFail($validated['produit_id']);
+                $produit->updateStock($validated['quantité_fournie']);
+            });
+    
+            return redirect()->route('approvisionnements.index')
+                ->with('success', 'Approvisionnement ajouté avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
+    
 
     /**
      * Display the specified resource.

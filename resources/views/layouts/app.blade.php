@@ -30,6 +30,12 @@
             <!-- Page Content -->
             <main>
                 @yield('content')
+                <!-- Main Content Area -->
+            <div class="flex-1 overflow-auto">
+                <div class="container mx-auto px-6 py-8">
+                    @yield('dashboard-content')
+                </div>
+            </div>
             </main>
         </div>
     </body>

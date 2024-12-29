@@ -10,6 +10,7 @@ use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ApprovisionnementController;
+use App\Http\Controllers\CommandeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +28,17 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $data = [
+        'totalUsers' => App\Models\User::count(),
+        'totalProducts' => App\Models\Produit::count(),
+        'pendingOrders' => App\Models\Commande::where('statut', 'En cours')->count(),
+        'activeSuppliers' => App\Models\Fournisseur::count(),
+        'recentOrders' => App\Models\Commande::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+    ];
+    return view('dashboard', compact('data'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Route::middleware('auth')->group(function () {
@@ -126,6 +137,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/edit', [ApprovisionnementController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ApprovisionnementController::class, 'update'])->name('update');
         Route::delete('/{id}', [ApprovisionnementController::class, 'destroy'])->name('destroy');
+    });
+
+    
+    //routes for commandes 
+    Route::prefix('commandes')->name('commandes.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        Route::get('/', [CommandeController::class, 'index'])->name('index');
+        Route::get('/create', [CommandeController::class, 'create'])->name('create');
+        Route::post('/', [CommandeController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [CommandeController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [CommandeController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CommandeController::class, 'destroy'])->name('destroy');
     });
 
     // Routes pour les notifications

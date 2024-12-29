@@ -103,7 +103,8 @@ class ProduitController extends Controller
     {
         $fournisseurs = Fournisseur::all();
         $produit = Produit::findOrFail($id);
-        return view('produits.edit', compact('produit', 'fournisseurs'));
+        $categories = Categorie::all();
+        return view('produits.edit', compact('produit', 'fournisseurs', 'categories'));
     }
 
     /**
