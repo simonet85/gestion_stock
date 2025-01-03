@@ -3,14 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FactureController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ActivityController;
-use App\Http\Controllers\ProduitController;
-use App\Http\Controllers\FournisseurController;
-use App\Http\Controllers\CategorieController;
-use App\Http\Controllers\ApprovisionnementController;
 use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\CategorieController;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ApprovisionnementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +48,7 @@ Route::get('/dashboard', function () {
 // });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/profile/index', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -171,6 +174,25 @@ Route::middleware(['auth'])->group(function () {
         }
         return redirect()->back();
     })->name('notification.read');
+
+    //routes for Transactions 
+    Route::prefix('transactions')->name('transactions.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        // Transaction Routes
+        Route::get('/', [TransactionController::class, 'index'])->name('index');
+        Route::get('/export', [TransactionController::class, 'export'])->name('export');
+        Route::get('/report', [TransactionController::class, 'generateReport'])->name('report');
+        //generate all transactions Report
+        Route::get('/report/transactions', [TransactionController::class, 'generateReport'])->name('report.transactions');
+    });
+    
+    // routes for Factures
+    Route::prefix('factures')->name('factures.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
+        // Invoice Routes
+        Route::get('/', [FactureController::class, 'index'])->name('index');
+        Route::get('/{facture}', [FactureController::class, 'show'])->name('show');
+        Route::get('/{facture}/pdf', [FactureController::class, 'generatePDF'])->name('pdf');
+        
+    });
     
 });
 

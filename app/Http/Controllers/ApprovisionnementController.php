@@ -6,6 +6,7 @@ use App\Models\Approvisionnement;
 use App\Models\Produit;
 use App\Models\Fournisseur;
 use Illuminate\Support\Facades\DB;
+use App\Models\Transaction;
 
 use Illuminate\Http\Request;
 
@@ -49,10 +50,20 @@ class ApprovisionnementController extends Controller
                 
                 $produit = Produit::findOrFail($validated['produit_id']);
                 $produit->updateStock($validated['quantité_fournie']);
+                
+                // register the transaction as purchase
+                // Transaction::recordPurchase($approvisionnement);
+                Transaction::create([
+                    'type' => 'achat',
+                    'quantité' => $validated['quantité_fournie'],
+                    'date_transaction' => now(),
+                    'user_id' => auth()->id(),
+                    'produit_id' => $produit->id
+                ]);
+                    
             });
-    
             return redirect()->route('approvisionnements.index')
-                ->with('success', 'Approvisionnement ajouté avec succès.');
+                            ->with('success', 'Approvisionnement ajouté avec succès.');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()

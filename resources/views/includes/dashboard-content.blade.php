@@ -1,13 +1,13 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">Tableau de Bord</h1>
-        <div class="relative">
+        <!-- <div class="relative">
             <button id="notifications-btn" class="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.5V11a6 6 0 00-12 0v3.5c0 .828-.332 1.582-.895 2.095L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0h-6" />
                 </svg>
             </button>
-        </div>
+        </div> -->
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

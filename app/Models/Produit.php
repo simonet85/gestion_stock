@@ -73,6 +73,8 @@ class Produit extends Model
     public function updateStock($quantity, $type = 'increment')
     {
         try {
+             // Cast quantity to integer
+            $quantity = (int) $quantity;
             if ($type === 'decrement') {
                 if ($this->quantite_stock < $quantity) {
                     throw new \Exception("Stock insuffisant pour {$this->nom}");
@@ -88,7 +90,7 @@ class Produit extends Model
             }
             return true;
         } catch (\Exception $e) {
-            \Log::error('Stock update failed: ' . $e->getMessage());
+            \Log::error('Erreur lors de la mise à jour du stock: ' . $e->getMessage());
             return false;
         }
     }

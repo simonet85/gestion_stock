@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Commande;
-use App\Models\Produit;
 use App\Models\User;
+use App\Models\Facture;
+use App\Models\Produit;
+use App\Models\Commande;
+use App\Models\Transaction;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\ProduitAlerte;
 
@@ -87,9 +89,55 @@ class CommandeController extends Controller
     
                     $data['produit']->updateStock($data['quantite'], 'decrement');
                 }
+
+                // Create invoice with correct status
+                if ($validated['statut'] === 'Validé') {
+                    Facture::create([
+                        'commande_id' => $commande->id,
+                        'user_id' => $validated['user_id'],
+                        'montant' => $totalMontant,
+                        'statut_paiement' => 'payé'
+                    ]);
+
+                    // Record transaction for validated orders
+                    foreach ($produitsData as $data) {
+                        Transaction::create([
+                            'type' => 'vente',
+                            'quantité' => $data['quantite'],
+                            'date_transaction' => now(),
+                            'user_id' => $validated['user_id'],
+                            'produit_id' => $data['produit']->id
+                        ]);
+                    }
+                }elseif ($validated['statut'] === 'Annulé') {
+                    // Record transaction for validated orders
+                    foreach ($produitsData as $data) {
+                        Transaction::create([
+                            'type' => 'annulé',
+                            'quantité' => $data['quantite'],
+                            'date_transaction' => now(),
+                            'user_id' => $validated['user_id'],
+                            'produit_id' => $data['produit']->id
+                        ]);
+                    }
+                }else {
+                    Facture::create([
+                        'commande_id' => $commande->id,
+                        'user_id' => $validated['user_id'],
+                        'montant' => $totalMontant,
+                        'statut_paiement' => 'en_attente'
+                    ]);
+                }
+
+                //Record transaction
+                Transaction::recordSale($commande);
+
+                //Generate invoice 
+                Facture::generateFromOrder($commande);
     
                 return redirect()->route('commandes.index')
                     ->with('success', 'Commande créée avec succès.');
+
             });
         } catch (\Exception $e) {
             return redirect()->back()
@@ -103,18 +151,15 @@ class CommandeController extends Controller
     {
         $commande = Commande::with(['produits' => function ($query) {
             $query->select('produits.*')
-                ->withPivot('quantite', 'prix_unitaire');
+            ->withPivot('quantite', 'prix_unitaire');
         }])->findOrFail($id);
     
-        $produits = Produit::select('produits.*')
-            ->addSelect([
-                'prix_unitaire' => \DB::table('approvisionnements')
-                    ->select('prix_unitaire')
-                    ->whereColumn('approvisionnements.produit_id', 'produits.id')
-                    ->orderBy('date_livraison', 'desc')
-                    ->limit(1)
-            ])
-            ->get();
+        $produits = Produit::with(['approvisionnements' => function ($query) {
+            $query->orderBy('date_livraison', 'desc')->limit(1);
+        }])->get()->map(function ($produit) {
+            $produit->latest_prix_unitaire = $produit->approvisionnements()->orderBy('date_livraison', 'desc')->value('prix_unitaire');
+            return $produit;
+        });
     
         $users = User::all();
     
@@ -122,7 +167,7 @@ class CommandeController extends Controller
     }
     
 
-    public function update(Request $request, Commande $commande)
+    public function update(Request $request, $id = null)
     {
         $validated = $request->validate([
             'date_commande' => 'required|date',
@@ -132,48 +177,103 @@ class CommandeController extends Controller
             'produits.*.quantite' => 'required|integer|min:1',
             'user_id' => 'required|exists:users,id',
         ]);
-
-        DB::transaction(function () use ($validated, $commande) {
-            $commande->update([
-                'date_commande' => $validated['date_commande'],
-                'statut' => $validated['statut'],
-                'user_id' => $validated['user_id'],
-            ]);
-
-            $totalQuantite = 0;
-            $totalMontant = 0;
-
-            $commande->produits()->detach();
-
-            foreach ($validated['produits'] as $produitData) {
-                $produit = Produit::findOrFail($produitData['id']);
-                $quantite = $produitData['quantite'];
-                $prixUnitaire = $produit->approvisionnements()->latest('date_livraison')->value('prix_unitaire') ?? 0;
-
-                $commande->produits()->attach($produit->id, [
-                    'quantite' => $quantite,
-                    'prix_unitaire' => $prixUnitaire,
-                ]);
-
-                $totalQuantite += $quantite;
-                $totalMontant += $prixUnitaire * $quantite;
-
-                $produit->increment('quantite_stock', $quantite);
-                $produit->decrement('quantite_stock', $quantite);
-
-                if ($produit->quantite_stock < $produit->seuil_reapprovisionnement) {
-                    $this->triggerLowStockAlert($produit);
+    
+        try {
+            return DB::transaction(function () use ($validated, $id) {
+                $commande = $id ? Commande::findOrFail($id) : new Commande();
+                $isUpdate = $commande->exists;
+    
+                $totalQuantite = 0;
+                $totalMontant = 0;
+                $produitsData = [];
+    
+                // Validate stock availability and calculate totals
+                foreach ($validated['produits'] as $produitData) {
+                    $produit = Produit::findOrFail($produitData['id']);
+                    if (!$isUpdate && $produit->quantite_stock < $produitData['quantite']) {
+                        throw new \Exception("Stock insuffisant pour {$produit->nom}");
+                    }
+    
+                    $prixUnitaire = $produit->getLatestPrice();
+                    $produitsData[] = [
+                        'produit' => $produit,
+                        'quantite' => $produitData['quantite'],
+                        'prix_unitaire' => $prixUnitaire
+                    ];
+    
+                    $totalQuantite += $produitData['quantite'];
+                    $totalMontant += ($prixUnitaire * $produitData['quantite']);
                 }
-            }
-
-            $commande->update([
-                'quantité_totale' => $totalQuantite,
-                'montant_total' => $totalMontant,
-            ]);
-        });
-
-        return redirect()->route('commandes.index')->with('success', 'Commande mise à jour avec succès.');
+    
+                // Update or create the commande
+                $commande->fill([
+                    'date_commande' => $validated['date_commande'],
+                    'statut' => $validated['statut'],
+                    'quantité_totale' => $totalQuantite,
+                    'montant_total' => $totalMontant,
+                    'user_id' => $validated['user_id'],
+                ]);
+                $commande->save();
+    
+                // Synchronize products for updates
+                $commande->produits()->sync([]);
+                foreach ($produitsData as $data) {
+                    $commande->produits()->attach($data['produit']->id, [
+                        'quantite' => $data['quantite'],
+                        'prix_unitaire' => $data['prix_unitaire']
+                    ]);
+    
+                    if (!$isUpdate) {
+                        $data['produit']->updateStock($data['quantite'], 'decrement');
+                    }
+                }
+    
+                // Handle status-specific actions
+                if ($validated['statut'] === 'Validé') {
+                    Facture::updateOrCreate(
+                        ['commande_id' => $commande->id],
+                        [
+                            'user_id' => $validated['user_id'],
+                            'montant' => $totalMontant,
+                            'statut_paiement' => 'payé'
+                        ]
+                    );
+                } elseif ($validated['statut'] === 'Annulé') {
+                    foreach ($produitsData as $data) {
+                        Transaction::create([
+                            'type' => 'annulé',
+                            'quantité' => $data['quantite'],
+                            'date_transaction' => now(),
+                            'user_id' => $validated['user_id'],
+                            'produit_id' => $data['produit']->id
+                        ]);
+                    }
+                } else {
+                    Facture::updateOrCreate(
+                        ['commande_id' => $commande->id],
+                        [
+                            'user_id' => $validated['user_id'],
+                            'montant' => $totalMontant,
+                            'statut_paiement' => 'en_attente'
+                        ]
+                    );
+                }
+    
+                return redirect()->route('commandes.index')
+                    ->with('success', $isUpdate ? 'Commande mise à jour avec succès.' : 'Commande créée avec succès.');
+            });
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
+    
+    
+    
+    
+    
+    
 
     public function destroy(Commande $commande)
     {

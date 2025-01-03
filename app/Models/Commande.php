@@ -11,7 +11,7 @@ class Commande extends Model
     use HasFactory;
 
     protected $casts = [
-        'date_commande' => 'date',
+        'date_commande' => 'date:d-m-Y',
     ];
     
     protected $fillable = ['date_commande', 'statut', 'quantité_totale', 'montant_total', 'user_id'];
@@ -34,4 +34,17 @@ class Commande extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function facture()
+    {
+        return $this->hasOne(Facture::class);
+    }
+
+    public function calculateTotal()
+    {
+        return $this->produits->sum(function ($produit) {
+            return $produit->pivot->quantite * $produit->pivot->prix_unitaire;
+        });
+    }
+
 }

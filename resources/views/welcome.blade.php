@@ -92,9 +92,33 @@
                         <p class="text-gray-600">Surveillez vos niveaux de stock en temps réel avec des mises à jour automatisées.</p>
                     </div>
                     <!-- Add more feature cards as needed -->
+                    <div class="p-6 bg-gray-50 rounded-xl">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Gestion des stocks</h3>
+                        <p class="text-gray-600">Gérez vos stocks de maniere efficace et optimisee.</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-xl">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>        
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Commandes</h3>
+                        <p class="text-gray-600">Gérez vos commandes de maniere efficace et optimisee.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- sticky footer  -->
+    <footer class="bg-gray-800 text-white py-4 top-0 z-50 sticky w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center">&copy; 2025 StockPro. Tous droits reservés.</p>
+        </div>
+    </footer>
 </body>
 </html>

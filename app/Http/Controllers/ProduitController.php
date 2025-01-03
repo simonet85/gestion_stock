@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Produit;
-use App\Models\Fournisseur;
 use App\Models\User;
-use App\Notifications\ProduitAlerte;
+use App\Models\Facture;
+use App\Models\Produit;
+use App\Models\Commande;
 use App\Models\Categorie;
+use App\Models\Fournisseur;
+use App\Models\Transaction;
+use Illuminate\Http\Request;
+use App\Models\Approvisionnement;
+use Illuminate\Support\Facades\DB;
+use App\Notifications\ProduitAlerte;
 
 
 class ProduitController extends Controller
@@ -18,6 +23,8 @@ class ProduitController extends Controller
     public function index()
     {
         $produits = Produit::with('fournisseur')->get();
+        //fetch all produits with their fournisseur and pass it to the view in descending order and paginate it
+        $produits = Produit::with('fournisseur')->orderBy('created_at', 'desc')->paginate(10);
 
         //Si quantite_stock < seuil_reapprovisionnement, déclencher une alerte.
         foreach ($produits as $produit) {
@@ -73,8 +80,7 @@ class ProduitController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $request->validate([
+        $validated = $request->validate([
             'nom' => 'required|string|max:255',
             'description' => 'nullable|string',
             'quantite_stock' => 'required|integer',
@@ -83,9 +89,27 @@ class ProduitController extends Controller
             'fournisseur_id' => 'required|exists:fournisseurs,id',
         ]);
 
+    try {
+         DB::transaction(function () use ($validated) {
+            // Create the product
+            $produit = Produit::create($validated);
 
-        Produit::create($request->all());
+            // Record initial stock transaction
+            Transaction::create([
+                'type' => 'achat',
+                'quantité' => $validated['quantite_stock'],
+                'date_transaction' => now(),
+                'user_id' => auth()->id(),
+                'produit_id' => $produit->id
+            ]);
+        });
         return redirect()->route('produits.index')->with('success', 'Produit ajouté avec succès.');
+    } catch (\Exception $e) {
+        return redirect()->back()
+        ->withInput()
+        ->withErrors(['error' => $e->getMessage()]);
+    }
+      
     }
 
     /**

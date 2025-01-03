@@ -94,6 +94,13 @@
                         </tr>
                     @endforelse
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6" class="px-6 py-4">
+                            {{ $produits->links() }}
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
