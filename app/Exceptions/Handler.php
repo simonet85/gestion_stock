@@ -26,5 +26,9 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+        // Handle specific exceptions
+        $this->renderable(function (MethodNotAllowedHttpException $e) {
+            return response()->view('errors.405', [], 405);
+        });
     }
 }

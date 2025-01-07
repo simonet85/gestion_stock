@@ -36,7 +36,7 @@
                                 {{ ucfirst($transaction->type) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4">{{ $transaction->date_transaction }}</td>
+                        <td class="px-6 py-4">{{ $transaction->date_transaction->format('d/m/Y H:i') }}</td>
                         <td class="px-6 py-4">{{ $transaction->produit->nom }}</td>
                         <td class="px-6 py-4">{{ $transaction->quantité }}</td>
                         <td class="px-6 py-4">{{ $transaction->user->name }}</td>
@@ -45,6 +45,15 @@
                 </tbody>
             </table>
         </div>
+        <div class="px-6 py-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-700">
+                Affichage de {{ $transactions->firstItem() ?? 0 }} à {{ $transactions->lastItem() ?? 0 }} sur {{ $transactions->total() }} résultats
+            </p>
+            
+            {{ $transactions->onEachSide(1)->links() }}
+        </div>
+    </div>
     </div>
 </div>
 @endsection

@@ -1,6 +1,7 @@
 <nav class="mt-4">
     <div class="px-4 space-y-2">
         <!-- Commandes Section -->
+        @canany(['view commandes', 'manage commandes'])
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,12 +13,18 @@
                 </svg>
             </button>
             <div x-show="open" class="pl-4 mt-2 space-y-2">
+                @can('view commandes')
                 <a href="{{ route('commandes.index') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Liste</a>
+                @endcan
+                @can('manage commandes')
                 <a href="{{ route('commandes.create') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Créer</a>
+                @endcan
             </div>
         </div>
+        @endcanany
 
         <!-- Fournisseurs Section -->
+        @canany(['view fournisseurs', 'manage fournisseurs'])
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,12 +36,18 @@
                 </svg>
             </button>
             <div x-show="open" class="pl-4 mt-2 space-y-2">
+                @can('view fournisseurs')
                 <a href="{{ route('fournisseurs.index') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Liste</a>
+                @endcan
+                @can('manage fournisseurs')
                 <a href="{{ route('fournisseurs.create') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Ajouter</a>
+                @endcan
             </div>
         </div>
+        @endcanany
 
         <!-- Categories Section -->
+        @canany(['view categories', 'manage categories'])
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,12 +59,18 @@
                 </svg>
             </button>
             <div x-show="open" class="pl-4 mt-2 space-y-2">
+                @can('view categories')
                 <a href="{{ route('categories.index') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Liste</a>
+                @endcan
+                @can('manage categories')
                 <a href="{{ route('categories.create') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Ajouter</a>
+                @endcan
             </div>
         </div>
+        @endcanany
 
         <!-- Approvisionnements Section -->
+        @canany(['view approvisionnements', 'manage approvisionnements'])
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,11 +82,18 @@
                 </svg>
             </button>
             <div x-show="open" class="pl-4 mt-2 space-y-2">
+                @can('view approvisionnements')
                 <a href="{{ route('approvisionnements.index') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Liste</a>
+                @endcan
+                @can('manage approvisionnements')
                 <a href="{{ route('approvisionnements.create') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Ajouter</a>
+                @endcan
             </div>
         </div>
+        @endcanany
+
         <!-- Transactions Section -->
+        @canany(['view transactions', 'manage transactions'])
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,7 +111,10 @@
                 <a href="{{ route('transactions.index') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Liste</a>
             </div> -->
         </div>
-        <!-- Factures Section-->
+        @endcanany
+
+        <!-- Factures Section -->
+        @canany(['view factures', 'manage factures', 'export factures'])
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,17 +130,15 @@
                 <!-- <a href="{{ route('approvisionnements.create') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Ajouter</a> -->
             </div>
         </div>
+        @endcanany
 
-        <!-- Notifications Section -->
+        <!-- Notifications Section - Available to all authenticated users -->
         <div x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center w-full p-2 text-white hover:bg-gray-700 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.5V11a6 6 0 00-12 0v3.5c0 .828-.332 1.582-.895 2.095L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0h-6"/>
                 </svg>
                 <span x-show="sidebarOpen" class="ml-3">Notifications</span>
-                <svg x-show="sidebarOpen" class="w-4 h-4 ml-auto" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
             </button>
             <div x-show="open" class="pl-4 mt-2 space-y-2">
                 <a href="{{ route('notifications') }}" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg">Voir tout</a>

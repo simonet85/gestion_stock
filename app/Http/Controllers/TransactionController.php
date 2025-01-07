@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Approvisionnement;
 use App\Exports\TransactionsExport;
+use Illuminate\Pagination\Paginator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TransactionController extends Controller
@@ -17,6 +18,11 @@ class TransactionController extends Controller
         $transactions = Transaction::with(['produit', 'user'])
             ->orderBy('date_transaction', 'desc')
             ->paginate(10);
+
+        // Configure pagination to use Tailwind styling
+        // Paginator::useBootstrap(); // Remove this if using Tailwind
+        // Or for Tailwind:
+        Paginator::defaultView('pagination::tailwind');
 
         return view('transactions.index', compact('transactions'));
     }

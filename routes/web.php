@@ -14,21 +14,11 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ApprovisionnementController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Dashboard Route
 Route::get('/dashboard', function () {
     $data = [
         'totalUsers' => App\Models\User::count(),
@@ -40,161 +30,128 @@ Route::get('/dashboard', function () {
             ->limit(5)
             ->get()
     ];
+
     return view('dashboard', compact('data'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Route::middleware('auth')->group(function () {
-//     Route::get('/dashboard', [ProfileController::class, 'edit'])->name('profile.edit');
-// });
-
-Route::middleware('auth')->group(function () {
+// Profile Routes
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile/index', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth'])->group(function () {
-    // Routes for users and their roles
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index')->middleware('role:Administrateur|Gestionnaire');
-        Route::get('/create', [UserController::class, 'create'])->name('create')->middleware('role:Administrateur|Gestionnaire');
-        Route::post('/', [UserController::class, 'store'])->name('store')->middleware('role:Administrateur|Gestionnaire');
-        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit')->middleware('role:Administrateur|Gestionnaire');
-        Route::put('/{id}', [UserController::class, 'update'])->name('update')->middleware('role:Administrateur|Gestionnaire');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy')->middleware('role:Administrateur|Gestionnaire');
+// User Management Routes
+Route::middleware(['auth'])->prefix('users')->name('users.')->group(function () {
+    Route::middleware('can:manage users')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
 
-        // Role management for users
-        Route::get('/{id}/roles', [UserController::class, 'editRoles'])->name('roles.edit')->middleware('role:Administrateur|Gestionnaire');
-        Route::post('/{id}/roles', [UserController::class, 'updateRoles'])->name('roles.update')->middleware('role:Administrateur|Gestionnaire');
-
-
+        // Role management
+        Route::get('/{id}/roles', [UserController::class, 'editRoles'])->name('roles.edit');
+        Route::post('/{id}/roles', [UserController::class, 'updateRoles'])->name('roles.update');
     });
+});
 
-    // Routes for administrators
-    Route::prefix('admins')->name('admins.')->middleware('role:Administrateur')->group(function () {
-        Route::get('/', [AdminController::class, 'index'])->name('index');
-        Route::get('/create', [AdminController::class, 'create'])->name('create');
-        Route::post('/', [AdminController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [AdminController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [AdminController::class, 'update'])->name('update');
-        Route::delete('/{id}', [AdminController::class, 'destroy'])->name('destroy');
-
-        // Role management for administrators
-        Route::get('/{id}/roles', [AdminController::class, 'editRoles'])->name('roles.edit');
-        Route::post('/{id}/roles', [AdminController::class, 'updateRoles'])->name('roles.update');
-
-        Route::get('/history', [ActivityController::class, 'index'])->name('history.index');
-
-    });
-
-    // Routes for managers
-    Route::prefix('managers')->name('managers.')->middleware('role:Administrateur')->group(function () {
-        Route::get('/', [ManagerController::class, 'index'])->name('index');
-        Route::get('/create', [ManagerController::class, 'create'])->name('create');
-        Route::post('/', [ManagerController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [ManagerController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ManagerController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ManagerController::class, 'destroy'])->name('destroy');
-
-        // Role management for managers
-        Route::get('/{id}/roles', [ManagerController::class, 'editRoles'])->name('roles.edit');
-        Route::post('/{id}/roles', [ManagerController::class, 'updateRoles'])->name('roles.update');
-    });
-
-    // Routes pour les produits
-    Route::prefix('produits')->name('produits.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        Route::get('/', [ProduitController::class, 'index'])->name('index');
+// Products Routes
+Route::middleware(['auth'])->prefix('produits')->name('produits.')->group(function () {
+    Route::middleware('can:view produits')->get('/', [ProduitController::class, 'index'])->name('index');
+    Route::middleware('can:manage produits')->group(function () {
         Route::get('/create', [ProduitController::class, 'create'])->name('create');
         Route::post('/', [ProduitController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [ProduitController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProduitController::class, 'update'])->name('update');
         Route::delete('/{id}', [ProduitController::class, 'destroy'])->name('destroy');
     });
+});
 
-    // Routes pour les fournisseurs
-    Route::prefix('fournisseurs')->name('fournisseurs.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        Route::get('/', [FournisseurController::class, 'index'])->name('index');
-        Route::get('/create', [FournisseurController::class, 'create'])->name('create');
-        Route::post('/', [FournisseurController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [FournisseurController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [FournisseurController::class, 'update'])->name('update');
-        Route::delete('/{id}', [FournisseurController::class, 'destroy'])->name('destroy');
-    });
-
-    // Routes pour les catégories 
-    Route::prefix('categories')->name('categories.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        Route::get('/', [CategorieController::class, 'index'])->name('index');
+// Categories Routes
+Route::middleware(['auth'])->prefix('categories')->name('categories.')->group(function () {
+    Route::middleware('can:view categories')->get('/', [CategorieController::class, 'index'])->name('index');
+    Route::middleware('can:manage categories')->group(function () {
         Route::get('/create', [CategorieController::class, 'create'])->name('create');
         Route::post('/', [CategorieController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [CategorieController::class, 'edit'])->name('edit');
         Route::put('/{id}', [CategorieController::class, 'update'])->name('update');
         Route::delete('/{id}', [CategorieController::class, 'destroy'])->name('destroy');
     });
+});
 
-    //routes for Approvisionnements
-    Route::prefix('approvisionnements',)->name('approvisionnements.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        Route::get('/', [ApprovisionnementController::class, 'index'])->name('index');
-        Route::get('/create', [ApprovisionnementController::class, 'create'])->name('create');
-        Route::post('/', [ApprovisionnementController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [ApprovisionnementController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ApprovisionnementController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ApprovisionnementController::class, 'destroy'])->name('destroy');
+// Fournisseurs Routes
+Route::middleware(['auth'])->prefix('fournisseurs')->name('fournisseurs.')->group(function () {
+    Route::middleware('can:view fournisseurs')->get('/', [FournisseurController::class, 'index'])->name('index');
+    Route::middleware('can:manage fournisseurs')->group(function () {
+        Route::get('/create', [FournisseurController::class, 'create'])->name('create');
+        Route::post('/', [FournisseurController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [FournisseurController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [FournisseurController::class, 'update'])->name('update');
+        Route::delete('/{id}', [FournisseurController::class, 'destroy'])->name('destroy');
     });
+});
 
-    
-    //routes for commandes 
-    Route::prefix('commandes')->name('commandes.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        Route::get('/', [CommandeController::class, 'index'])->name('index');
+// Commandes Routes
+Route::middleware(['auth'])->prefix('commandes')->name('commandes.')->group(function () {
+    Route::middleware('can:view commandes')->get('/', [CommandeController::class, 'index'])->name('index');
+    Route::middleware('can:manage commandes')->group(function () {
         Route::get('/create', [CommandeController::class, 'create'])->name('create');
         Route::post('/', [CommandeController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [CommandeController::class, 'edit'])->name('edit');
         Route::put('/{id}', [CommandeController::class, 'update'])->name('update');
         Route::delete('/{id}', [CommandeController::class, 'destroy'])->name('destroy');
     });
-
-    // Routes pour les notifications
-    Route::get('/notifications', function () {
-        // Fetch unread notifications with pagination (e.g., 10 per page)
-        $notifications = auth()->user()->unreadNotifications()->paginate(3);
-        return view('notifications.index', compact('notifications'));
-    })->name('notifications');
-
-    // Mark all notifications as read
-    Route::get('/notifications/read', function () {
-        auth()->user()->unreadNotifications->markAsRead();
-        return redirect()->back();
-    })->name('notifications.read');
-
-    // Mark a specific notification as read
-    Route::post('/notifications/{id}/read', function ( $id) {
-        $notification = auth()->user()->unreadNotifications()->find($id);
-        if($notification){
-            $notification->markAsRead();
-        }
-        return redirect()->back();
-    })->name('notification.read');
-
-    //routes for Transactions 
-    Route::prefix('transactions')->name('transactions.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        // Transaction Routes
-        Route::get('/', [TransactionController::class, 'index'])->name('index');
-        Route::get('/export', [TransactionController::class, 'export'])->name('export');
-        Route::get('/report', [TransactionController::class, 'generateReport'])->name('report');
-        //generate all transactions Report
-        Route::get('/report/transactions', [TransactionController::class, 'generateReport'])->name('report.transactions');
-    });
-    
-    // routes for Factures
-    Route::prefix('factures')->name('factures.')->middleware('role:Administrateur|Gestionnaire')->group(function () {
-        // Invoice Routes
-        Route::get('/', [FactureController::class, 'index'])->name('index');
-        Route::get('/{facture}', [FactureController::class, 'show'])->name('show');
-        Route::get('/{facture}/pdf', [FactureController::class, 'generatePDF'])->name('pdf');
-        
-    });
-    
 });
 
+// Transactions Routes
+Route::middleware(['auth'])->prefix('transactions')->name('transactions.')->group(function () {
+    Route::middleware('can:view transactions')->get('/', [TransactionController::class, 'index'])->name('index');
+    Route::middleware('can:export transactions')->get('/export', [TransactionController::class, 'export'])->name('export');
+    Route::middleware('can:manage transactions')->get('/report', [TransactionController::class, 'generateReport'])->name('report');
+});
+
+// Factures Routes
+Route::middleware(['auth'])->prefix('factures')->name('factures.')->group(function () {
+    Route::middleware('can:view factures')->get('/', [FactureController::class, 'index'])->name('index');
+    Route::middleware('can:manage factures')->get('/{facture}', [FactureController::class, 'show'])->name('show');
+    Route::middleware('can:export factures')->get('/{facture}/pdf', [FactureController::class, 'generatePDF'])->name('pdf');
+});
+
+// Approvisionnements Routes
+Route::middleware(['auth'])->prefix('approvisionnements')->name('approvisionnements.')->group(function () {
+    Route::middleware('can:view approvisionnements')->get('/', [ApprovisionnementController::class, 'index'])->name('index');
+    Route::middleware('can:manage approvisionnements')->group(function () {
+        Route::get('/create', [ApprovisionnementController::class, 'create'])->name('create');
+        Route::post('/', [ApprovisionnementController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ApprovisionnementController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ApprovisionnementController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ApprovisionnementController::class, 'destroy'])->name('destroy');
+    });
+});
+
+// Routes pour les notifications
+Route::get('/notifications', function () {
+    // Fetch unread notifications with pagination (e.g., 10 per page)
+    $notifications = auth()->user()->unreadNotifications()->paginate(3);
+    return view('notifications.index', compact('notifications'));
+})->name('notifications');
+
+// Mark all notifications as read
+Route::get('/notifications/read', function () {
+    auth()->user()->unreadNotifications->markAsRead();
+    return redirect()->back();
+})->name('notifications.read');
+
+// Mark a specific notification as read
+Route::post('/notifications/{id}/read', function ( $id) {
+    $notification = auth()->user()->unreadNotifications()->find($id);
+    if($notification){
+        $notification->markAsRead();
+    }
+    return redirect()->back();
+})->name('notification.read');
 
 require __DIR__.'/auth.php';

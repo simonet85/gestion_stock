@@ -11,79 +11,95 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Users Management Card -->
-        <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <h2 class="text-xl font-semibold text-gray-800">Gestion des Utilisateurs</h2>
-                </div>
-                <div class="space-y-3">
-                    <a href="{{ route('users.index') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
-                        <span class="mr-3">👥</span>
-                        Liste des utilisateurs
-                    </a>
-                    <a href="{{ route('users.create') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
-                        <span class="mr-3">➕</span>
-                        Ajouter un utilisateur
-                    </a>
-                </div>
+    <!-- Users Management Card -->
+    @canany(['view users', 'manage users'])
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-800">Gestion des Utilisateurs</h2>
             </div>
-        </div>
-
-        <!-- Products Management Card -->
-        <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <h2 class="text-xl font-semibold text-gray-800">Gestion des Produits</h2>
-                </div>
-                <div class="space-y-3">
-                    <a href="{{ route('produits.index') }}" class="flex items-center p-3 text-gray-700 hover:bg-green-50 rounded-lg transition-colors duration-200">
-                        <span class="mr-3">📦</span>
-                        Liste des produits
-                    </a>
-                    <a href="{{ route('produits.create') }}" class="flex items-center p-3 text-gray-700 hover:bg-green-50 rounded-lg transition-colors duration-200">
-                        <span class="mr-3">➕</span>
-                        Ajouter un produit
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Similar pattern for other modules -->
-        <!-- Each card should follow the same structure but with different icons and hover colors -->
-                 <!-- Supplier Management Card -->
-        <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <!-- supplier svg icon -->
-                    <svg class="w-5 h-5 md:w-6 lg:w-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
-                    <h2 class="text-xl font-semibold text-gray-800">Gestion des Fournisseurs</h2>
-                </div>
-                <div class="space-y-3">
-                    <a href="{{ route('fournisseurs.index') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
-                        <span class="mr-3">
-                            <svg class="w-5 h-5 md:w-6 lg:w-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
-                        </span>
-                        Liste des fournisseurs
-                    </a>
-                    <a href="{{ route('fournisseurs.create') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
-                        <span class="mr-3">➕</span>
-                        Ajouter un fournisseurs
-                    </a>
-                </div>
+            <div class="space-y-3">
+                @can('view users')
+                <a href="{{ route('users.index') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                    <span class="mr-3">👥</span>
+                    Liste des utilisateurs
+                </a>
+                @endcan
+                @can('manage users')
+                <a href="{{ route('users.create') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                    <span class="mr-3">➕</span>
+                    Ajouter un utilisateur
+                </a>
+                @endcan
             </div>
         </div>
     </div>
+    @endcanany
+
+    <!-- Products Management Card -->
+    @canany(['view produits', 'manage produits'])
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-800">Gestion des Produits</h2>
+            </div>
+            <div class="space-y-3">
+                @can('view produits')
+                <a href="{{ route('produits.index') }}" class="flex items-center p-3 text-gray-700 hover:bg-green-50 rounded-lg transition-colors duration-200">
+                    <span class="mr-3">📦</span>
+                    Liste des produits
+                </a>
+                @endcan
+                @can('manage produits')
+                <a href="{{ route('produits.create') }}" class="flex items-center p-3 text-gray-700 hover:bg-green-50 rounded-lg transition-colors duration-200">
+                    <span class="mr-3">➕</span>
+                    Ajouter un produit
+                </a>
+                @endcan
+            </div>
+        </div>
+    </div>
+    @endcanany
+
+    <!-- Supplier Management Card -->
+    @canany(['view fournisseurs', 'manage fournisseurs'])
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-5 h-5 md:w-6 lg:w-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-800">Gestion des Fournisseurs</h2>
+            </div>
+            <div class="space-y-3">
+                @can('view fournisseurs')
+                <a href="{{ route('fournisseurs.index') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                    <span class="mr-3">
+                        <svg class="w-5 h-5 md:w-6 lg:w-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                    </span>
+                    Liste des fournisseurs
+                </a>
+                @endcan
+                @can('manage fournisseurs')
+                <a href="{{ route('fournisseurs.create') }}" class="flex items-center p-3 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                    <span class="mr-3">➕</span>
+                    Ajouter un fournisseur
+                </a>
+                @endcan
+            </div>
+        </div>
+    </div>
+    @endcanany
+</div>
+
 
     <!-- Quick Stats Section -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">

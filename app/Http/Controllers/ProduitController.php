@@ -102,9 +102,10 @@ class ProduitController extends Controller
                 'user_id' => auth()->id(),
                 'produit_id' => $produit->id
             ]);
+            return redirect()->route('produits.index')->with('success', 'Produit ajouté avec succès.');
         });
-        return redirect()->route('produits.index')->with('success', 'Produit ajouté avec succès.');
-    } catch (\Exception $e) {
+    } 
+    catch (\Exception $e) {
         return redirect()->back()
         ->withInput()
         ->withErrors(['error' => $e->getMessage()]);
